@@ -1,9 +1,3 @@
-/*
-
-Level 2
-
-*/
-
 CREATE SCHEMA books_schema;
 
 CREATE TABLE books_schema.books1 
@@ -294,3 +288,163 @@ FULL OUTER JOIN ecommerce_schema.orders as o
 ON c.customer_id = o.customer_id
 WHERE customer_city = 'franca'
 ORDER BY 3 DESC;
+
+/*
+
+	SUB QUERY
+*/
+
+ -- get all the customers whose name ends with 'n' and their city is 'franca'
+select * from 
+(select * from ecommerce_schema.customers where customer_name like '%n')
+where customer_city = 'franca';
+
+select isbn, ROUND(avg(book_rating), 2) from books_schema.ratings group by isbn;
+
+select * from books_schema.ratings limit 10;
+
+select * from books_schema.books2 limit 10;
+
+-- get all the publishers and their average ratings of their books
+select publisher, ROUND(avg(book_rating), 2) as avg_book_rating
+FROM (select publisher, book_rating from books_schema.books2 b
+	INNER JOIN books_schema.ratings r
+	ON b.isbn = r.isbn) as x
+GROUP BY publisher
+ORDER BY avg_book_rating DESC;
+
+select publisher, count(book_title) from books_schema.books2
+group by publisher;
+
+-- get list of publishers and the count of their books published with the average rating of the books, where average is >= 8
+select publisher, ROUND(AVG(r.book_rating),2) as avg_book_rating, COUNT(book_title) as books_published
+from books_schema.books2 b
+INNER JOIN books_schema.ratings r
+ON b.isbn = r.isbn
+GROUP BY publisher
+HAVING AVG(r.book_rating) >= 8
+ORDER BY avg_book_rating ASC;
+
+select * from books_schema.books2 where publisher='AMC Publishing';
+select * from books_schema.ratings where isbn='929638298';
+
+/*
+
+	CASE
+
+*/
+
+select user_id, age, country,
+	CASE gender
+		WHEN 'M' THEN 'Male'
+		ELSE 'Female'
+	END AS gender
+from books_schema.users;
+
+select user_id, country, age,
+	CASE 
+		WHEN age <=14 THEN 'Child'
+		WHEN age > 14 and age <= 18 THEN 'Teenager'
+		WHEN age > 18 AND age <= 60 THEN 'Adult'
+		ELSE 'Senior'
+	END AS age_category
+from books_schema.users;
+
+
+/*
+
+	WINDOW FUNCTIONS (OVER and PARTITION BY)
+
+	OVER - transform a function to a window function
+	PARTITION - divides the rows into partitions of the same values
+	
+*/
+
+-- List of users & for each user present also the average age of users living in the same city
+
+SELECT user_id, age, city, state, round(avg(age) OVER (PARTITION BY city), 2) as avg_age
+from books_schema.users
+WHERE city IS NOT NULL
+AND city ~ '^[A-Za-z]+$'; -- regex to check for only cities having alphabets in the city name
+
+-- ROW_NUMBER() window function
+-- what's happening is we made paritions by city and order the partitions by age DESC, and assigned each row in a partition a number
+-- starting from 1 to the last row in that partition
+-- That's why we can see whenever the city name changes the counting starts from the beginning
+SELECT user_id, age, city, ROW_NUMBER() OVER (PARTITION BY city ORDER BY age DESC) as row_num
+from books_schema.users
+WHERE city IS NOT NULL
+AND city ~ '^[A-Za-z]+$';
+
+
+-- The oldest user per city
+
+SELECT * FROM (
+	SELECT user_id, age, city, state, ROW_NUMBER() OVER (PARTITION BY city ORDER BY age DESC) as row_num
+	from books_schema.users
+	WHERE city IS NOT NULL
+	AND city ~ '^[A-Za-z]+$'
+)
+WHERE row_num = 1;
+
+-- RANK() Window Function
+
+SELECT * FROM (
+	SELECT user_id, age, city, state,
+	RANK() OVER (PARTITION BY city ORDER BY age DESC) as rank_num
+	FROM books_schema.users
+	WHERE city IS NOT NULL
+	AND city ~ '^[A-Za-z]+$'
+)
+where state = 'seoul';
+
+select * from books_schema.users
+WHERE state IS NOT NULL
+AND state = 'seoul';
+
+/*
+
+	Virtual Tables (Views)
+	-- Looking on data coming from single/ multiple tables without replicating the data
+	-- a view is query stored in the database dictionary
+	-- computed on demand by the database server
+
+*/
+
+CREATE VIEW books_schema.users_vw AS (
+	SELECT user_id, age, country,
+		CASE gender
+			WHEN 'M' THEN 'Male'
+			ELSE 'Female'
+		END AS gender
+	FROM books_schema.users
+);
+
+SELECT * FROM books_schema.users_vw;
+
+CREATE VIEW books_schema.books_vw as (
+	SELECT * 
+	FROM books_schema.books1
+	UNION
+	SELECT *
+	FROM books_schema.books2
+);
+
+select * from books_schema.books_vw;
+
+/*
+
+	CTE - Common Table Expression
+
+*/
+
+WITH avg_book_ratings_CTE 
+AS 
+(
+	SELECT isbn, AVG(book_rating) AS avg_rating
+	FROM books_schema.ratings
+	GROUP BY isbn
+)
+
+SELECT max(avg_rating) as max_avg_rating
+FROM avg_book_ratings_CTE;
