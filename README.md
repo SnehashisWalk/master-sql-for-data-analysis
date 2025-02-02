@@ -1,6 +1,6 @@
 # Master SQL for Data Analysis 🚀
 
-Link: [*Master SQL for Data Analysis*](https://www.oreilly.com/library/view/master-sql-for/9781837638680)
+Link: [*Master SQL for Data Analysis*](https://www.oreilly.com/library/view/master-sql-for/9781837638680){:target="_blank"}
 
 My learning for the book *Master SQL for Data Analysis* by the author Idan Gabrieli (Packt published).
 
