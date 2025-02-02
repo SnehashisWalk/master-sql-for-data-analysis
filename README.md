@@ -1,4 +1,7 @@
 # Master SQL for Data Analysis 🚀
+
+Link: <a href="https://www.oreilly.com/library/view/master-sql-for/9781837638680"><i>Master SQL for Data Analysis</i></a>
+
 My learning for the book Master SQL for Data Analysis by the author Idan Gabrieli (Packt published)
 
 The files shared in the repository are my learnings the data files are by the author Idan Gabrieli (Packt), I have added them for anyone who wants to learn.
