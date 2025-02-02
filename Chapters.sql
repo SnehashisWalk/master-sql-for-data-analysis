@@ -53,3 +53,36 @@ select * from netflix.credits;
 
 -- Chapter 5: SQL Querying Data
 
+/*
+
+FROM >> WHERE >> GROUP BY >> HAVING >> SELECT >> ORDER BY
+
+*/
+
+select title_type, release_year, max(imdb_score) as max_imdb_score
+from netflix.titles
+group by title_type, release_year
+having max(imdb_score) IS NOT NULL
+order by title_type, release_year ASC;
+
+-- Data Dictionary
+
+SELECT table_schema, table_name, table_type
+from information_schema.tables
+where table_schema = 'netflix'
+order by 1;
+
+SELECT * 
+FROM information_schema.columns
+WHERE table_schema = 'netflix' AND table_name = 'titles';
+
+SELECT constraint_name, table_name, constraint_type
+FROM information_schema.table_constraints
+WHERE table_schema = 'netflix' AND table_name = 'titles';
+
+SELECT *
+FROM information_schema.tables;
+
+SELECT *
+FROM pg_catalog.pg_views
+WHERE schemaname = 'information_schema';
