@@ -17,6 +17,6 @@ docker-compose up
 To copy the csv file from your local machine to Docker volumes so that you can use the dataset
 
 ```bash
-docker cp ~/Downloads/credits.csv postgres:/tmp/credits.csv;
+docker cp ~/Downloads/credits.csv postgres:/tmp/credits.csv
 ```
 
